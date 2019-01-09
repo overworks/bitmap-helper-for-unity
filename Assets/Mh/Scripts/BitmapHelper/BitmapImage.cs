@@ -11,10 +11,12 @@ namespace Mh
         public IDIBHeader dibHeader;
         public byte[] rawData;
 
-        //public uint maskR = 0x00ff0000;
-        //public uint maskG = 0x0000ff00;
-        //public uint maskB = 0x000000ff;
-        //public uint maskA = 0x00000000;
+        public uint maskR = 0x00ff0000;
+        public uint maskG = 0x0000ff00;
+        public uint maskB = 0x000000ff;
+        public uint maskA = 0x00000000;
+
+        public byte[] palette;
 
         private Texture2D cachedTexture;
 
@@ -142,11 +144,11 @@ namespace Mh
 
             if (dibHeaderSize == 12)
             {
-                dibHeader = new BMPCoreHeader();
+                dibHeader = new BitmapCoreHeader();
             }
             else if (dibHeaderSize == 40)
             {
-                dibHeader = new BMPInfoHeader();
+                dibHeader = new BitmapInfoHeader();
             }
 
             if (dibHeader == null || !dibHeader.Read(reader))
@@ -161,18 +163,26 @@ namespace Mh
                 return false;
             }
 
-            // 안쓰이지만 일단...
-            //if (dibHeader.compression == BMPCompression.BI_BITFIELDS || dibHeader.compression == BMPCompression.BI_ALPHABITFIELDS)
-            //{
-            //    maskR = reader.ReadUInt32();
-            //    maskG = reader.ReadUInt32();
-            //    maskB = reader.ReadUInt32();
+            // 지금은 지원 안하지만 일단...
+            if (dibHeader.compression == BitmapCompression.BI_BITFIELDS || dibHeader.compression == BitmapCompression.BI_ALPHABITFIELDS)
+            {
+                maskR = reader.ReadUInt32();
+                maskG = reader.ReadUInt32();
+                maskB = reader.ReadUInt32();
 
-            //    if (dibHeader.compression == BMPCompression.BI_ALPHABITFIELDS)
-            //    {
-            //        maskA = reader.ReadUInt32();
-            //    }
-            //}
+                if (dibHeader.compression == BitmapCompression.BI_ALPHABITFIELDS)
+                {
+                    maskA = reader.ReadUInt32();
+                }
+            }
+
+            // 이것도 지원 안하지만 일단...
+            if (dibHeader.bpp <= 8)
+            {
+                // 8비트 이하라면 인덱스 컬러.
+                
+
+            }
 
             reader.BaseStream.Seek(fileHeader.offset, SeekOrigin.Begin);
             uint rawImageSize = dibHeader.rawImageSize;

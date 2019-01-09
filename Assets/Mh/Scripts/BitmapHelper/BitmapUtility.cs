@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using UnityEngine;
 
 // 사실 UnityEngine 네임스페이스에 넣어야 될 것 같은데 그러면 안되겠지...
@@ -9,11 +9,13 @@ namespace Mh
         // EncodeToPNG...등과 인터페이스를 맞춤.
         public static byte[] EncodeToBMP(this Texture2D tex)
         {
+#if UNITY_2018_3_OR_NEWER
             if (!tex.isReadable)
             {
                 Debug.LogError("Texture is not readable.");
                 return null;
             }
+#endif
 
             TextureFormat format = tex.format;
             if (format != TextureFormat.RGB24 && format != TextureFormat.ARGB32)

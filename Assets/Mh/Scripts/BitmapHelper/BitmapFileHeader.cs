@@ -13,6 +13,14 @@ namespace Mh
         public ushort reserved2;
         public uint offset;
 
+        public BMPFileHeader(ushort filesize = 0, uint offset = 0)
+        {
+            this.filesize = filesize;
+            this.offset = offset;
+            reserved1 = 0;
+            reserved2 = 0;
+        }
+
         public bool Read(BinaryReader reader)
         {
             if (reader == null)

@@ -25,22 +25,25 @@ namespace Mh
         ushort bpp { get; }
         BitmapCompression compression { get; }
         uint rawImageSize { get; }         // can be 0
+        uint numPalette { get; }
 
         bool Read(BinaryReader reader);
         bool Write(BinaryWriter writer);
     }
 
-    public class BMPCoreHeader : IDIBHeader
+    public class BitmapCoreHeader : IDIBHeader
     {
         public const uint HEADER_SIZE = 12;
+        public const ushort PLANE_COUNT = 1;
 
-        public uint headerSize { get; set; }    // size of header. 12
+        public uint headerSize { get { return HEADER_SIZE; } }    // size of header. 12
         public int width { get; set; }          // 원래는 부호없는 16비트 타입이지만 인터페이스와 맞추기 위해...
         public int height { get; set; }
-        public ushort planes { get; set; }      // must be 1
+        public ushort planes { get { return PLANE_COUNT; } }      // must be 1
         public ushort bpp { get; set; }         // bit per pixel. 1, 2, 4, 8, 16, 24, 32.
         public BitmapCompression compression { get { return BitmapCompression.BI_RGB; } }
         public uint rawImageSize { get { return 0; } }
+        public uint numPalette { get { return 0; } }
 
         public bool Read(BinaryReader reader)
         {
@@ -51,7 +54,7 @@ namespace Mh
 
             uint headerSize = reader.ReadUInt32();
 
-            if (headerSize != 12)
+            if (headerSize != HEADER_SIZE)
             {
                 //throw new IOException("DIB Header size is invalid.");
                 return false;
@@ -61,7 +64,7 @@ namespace Mh
             ushort height = reader.ReadUInt16();
             ushort planes = reader.ReadUInt16();
 
-            if (planes != 1)
+            if (planes != PLANE_COUNT)
             {
                 //throw new IOException("plane must be 1.");
                 return false;
@@ -75,14 +78,8 @@ namespace Mh
                 return false;
             }
 
-            long currentPosition = reader.BaseStream.Position;
-            long endPosition = reader.BaseStream.Seek(0, SeekOrigin.End);
-            reader.BaseStream.Seek(currentPosition, SeekOrigin.Current);
-
-            this.headerSize = headerSize;
             this.width = width;
             this.height = height;
-            this.planes = planes;
             this.bpp = bpp;
 
             return true;
@@ -105,14 +102,15 @@ namespace Mh
         }
     }
 
-    public class BMPInfoHeader : IDIBHeader
+    public class BitmapInfoHeader : IDIBHeader
     {
         public const uint HEADER_SIZE = 40;
+        public const ushort PLANE_COUNT = 1;
 
-        public uint headerSize { get; set; }    // size of header. 40.
+        public uint headerSize { get { return HEADER_SIZE; } }    // size of header. 40.
         public int width { get; set; }
         public int height { get; set; }
-        public ushort planes { get; set; }      // must be 1
+        public ushort planes { get { return PLANE_COUNT; } }      // must be 1
         public ushort bpp { get; set; }         // bit per pixel. 1, 2, 4, 8, 16, 24, 32.
         public BitmapCompression compression { get; set; }
         public uint rawImageSize { get; set; }     // can be 0
@@ -139,7 +137,7 @@ namespace Mh
             int height = reader.ReadInt32();
 
             ushort planes = reader.ReadUInt16();
-            if (planes != 1)
+            if (planes != PLANE_COUNT)
             {
                 //throw new IOException("plane must be 1.");
                 return false;
@@ -159,10 +157,8 @@ namespace Mh
             uint palette = reader.ReadUInt32();
             uint important = reader.ReadUInt32();
 
-            this.headerSize = headerSize;
             this.width = width;
             this.height = height;
-            this.planes = planes;
             this.bpp = bpp;
             this.compression = (BitmapCompression)compression;
             this.rawImageSize = rawImageSize;
