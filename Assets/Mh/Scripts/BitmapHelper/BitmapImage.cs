@@ -73,9 +73,36 @@ namespace Mh
                 }
                 else if (dibHeader.bpp == 16)
                 {
+                    int width = Mathf.Abs(dibHeader.width);
+                    int height = Mathf.Abs(dibHeader.height);
+                    byte[] data = rawData;
+
+                    // 패딩이 있으면 다시 계산.
+                    if ((width * 2) % 4 > 0)
+                    {
+                        data = new byte[width * height * 2];
+
+                        int padding = 4 - ((width * 2) % 4);
+
+                        int i = 0;
+                        for (int y = 0; y < height; ++y)
+                        {
+                            for (int x = 0; x < width; ++x)
+                            {
+                                // 테스트 안해봄... 바이트를 바꾸거나 비트 시프트 해줘야 하던가?;;;
+                                data[x + y * width] = rawData[i];
+                                data[x + y * width + 1] = rawData[i + 1];
+
+                                i += 2;
+                            }
+
+                            i += padding;
+                        }
+                    }
+                    
                     texture = new Texture2D(dibHeader.width, dibHeader.height, TextureFormat.RGB565, false);
                     texture.filterMode = FilterMode.Point;
-                    texture.LoadRawTextureData(rawData);
+                    texture.LoadRawTextureData(data);
                     texture.Apply();
                 }
 
